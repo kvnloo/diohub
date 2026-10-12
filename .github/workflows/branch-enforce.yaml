@@ -17,6 +17,11 @@ jobs:
         with:
           policy: |
             *:develop
+            # Explicit one-level branch prefixes: "*" alone does not match "/".
+            feature/*:develop
+            fix/*:develop
+            # Fork staging supports reviewable stacked fix branches.
+            fix/*:fix/*
             develop:beta
             hotfix/*:beta
             hotfix/*:main
