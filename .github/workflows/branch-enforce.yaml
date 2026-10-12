@@ -15,12 +15,12 @@ jobs:
     steps:
       - uses: ncalteen/branch-enforcement@v2
         with:
+          # "*" matches only a single path segment; fork CI also accepts
+          # common slash-delimited contributor branches and stacked fix PRs.
           policy: |
             *:develop
-            # Explicit one-level branch prefixes: "*" alone does not match "/".
             feature/*:develop
             fix/*:develop
-            # Fork staging supports reviewable stacked fix branches.
             fix/*:fix/*
             develop:beta
             hotfix/*:beta
