@@ -39,6 +39,9 @@ extension EntityRefRouting on EntityRef {
             ),
             PRReviewCommentRef r => PullRequestDetailRoute(
               pullRef: PullRequestRef(repo: r.repo, number: r.prNumber),
+              // Threads is the fifth unconditional PR tab in pull_tabs.dart.
+              // Exact comment focus requires a separate paginated-thread lookup.
+              initialIndex: 4,
             ),
           }
           as PageRouteInfo;
