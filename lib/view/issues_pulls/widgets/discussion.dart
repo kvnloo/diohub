@@ -1,3 +1,4 @@
+import 'package:diohub/common/misc/async_error_widgets.dart';
 import 'package:diohub/common/misc/button.dart';
 import 'package:diohub/common/misc/inline_container.dart';
 import 'package:diohub/common/misc/list_loading_shimmers.dart';
@@ -35,6 +36,7 @@ import 'package:diohub/utils/timeline/timeline_semantic_interpreter.dart';
 import 'package:diohub/utils/utils.dart';
 import 'package:diohub/view/issues_pulls/widgets/comment_box.dart';
 import 'package:diohub/view/issues_pulls/widgets/timeline_context_content.dart';
+import 'package:diohub/view/issues_pulls/widgets/timeline_fetch_policy.dart';
 import 'package:diohub/view/issues_pulls/widgets/timeline_item.dart';
 import 'package:flutter/material.dart' hide DatePickerTheme;
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
@@ -562,14 +564,20 @@ class IssuePullTimelineState extends ConsumerState<IssuePullTimeline> {
       builder: (final BuildContext ctx, final Widget? child) {
         final state = _controller.state.value;
         final displayItems = state.items;
-        final isLoading = state.phase is LoadingForward ||
-            state.phase is LoadingBackward ||
-            state.phase is Refreshing;
-        final itemCount =
-            displayItems.length + (state.hasMoreForward && !isLoading ? 1 : 0);
+        final PaginationPhase phase = state.phase;
+        final bool isLoading = phase is LoadingForward ||
+            phase is LoadingBackward || phase is Refreshing;
+        final bool autoFetchNextPage = shouldAutoFetchTimelinePage(
+          hasMoreForward: state.hasMoreForward,
+          phase: phase,
+        );
+        final int itemCount =
+            displayItems.length + (autoFetchNextPage ? 1 : 0);
         return MultiSliver(
           children: <Widget>[
-            if (state.hasMoreBackward)
+            if (state.hasMoreBackward &&
+                !(phase is Failed &&
+                    phase.direction == FetchDirection.backward))
               SliverToBoxAdapter(
                 child: LoadEarlierButton(
                   onTap: () async => _controller.fetchBackward(),
@@ -617,6 +625,18 @@ class IssuePullTimelineState extends ConsumerState<IssuePullTimeline> {
                 );
               },
             ),
+            if (phase is Failed)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: ctx.spacing.pagePadding,
+                  child: ApiErrorWidget(
+                    error: phase.error,
+                    onRetry: phase.direction == FetchDirection.forward
+                        ? () => _controller.fetchForward()
+                        : () => _controller.fetchBackward(),
+                  ),
+                ),
+              ),
             if (isLoading && displayItems.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
