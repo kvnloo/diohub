@@ -168,11 +168,20 @@ class IssuePullTimelineState extends ConsumerState<IssuePullTimeline> {
         );
       },
       anchor: (String itemId) async {
-        final createdAt =
-            await ref.read(commentCreatedAtProvider(itemId).future);
+        final int? issueCommentId = itemId.startsWith('issuecomment-')
+            ? int.tryParse(itemId.substring('issuecomment-'.length))
+            : null;
+        final DateTime? createdAt = issueCommentId == null
+            ? await ref.read(commentCreatedAtProvider(itemId).future)
+            : await ref
+                .read(commentNodeResolverServiceProvider)
+                .resolveIssueCommentCreatedAt(widget.repo, issueCommentId);
+        if (createdAt == null) {
+          throw StateError('Comment timestamp unavailable for $itemId');
+        }
         final result = await service.getTimeline(
           refresh: true,
-          since: createdAt?.subtract(const Duration(seconds: 30)),
+          since: createdAt.subtract(const Duration(seconds: 30)),
         );
         return AnchorResult<TimelineEdge>(
           items: _wrapEdges(result.edges.toList()),

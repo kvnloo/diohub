@@ -1,5 +1,6 @@
 import 'package:diohub/app/api_handler/dio.dart';
 import 'package:diohub_graphql/queries/common/resolve_node.graphql.dart';
+import 'package:diohub_models/models/entity_ref.dart';
 import 'package:diohub/services/base/base_service.dart';
 
 /// Resolves comment node metadata by ID (e.g. createdAt).
@@ -27,5 +28,20 @@ class CommentNodeResolverService extends BaseService {
           c.createdAt,
       orElse: () => null,
     );
+  }
+
+  /// GitHub URL fragments use numeric REST comment IDs, not GraphQL node IDs.
+  Future<DateTime> resolveIssueCommentCreatedAt(
+    final RepoRef repo,
+    final int commentId,
+  ) async {
+    final response = await rest.get<Map<String, dynamic>>(
+      '${repo.apiPath}/issues/comments/$commentId',
+    );
+    final Object? timestamp = response.data?['created_at'];
+    if (timestamp is! String) {
+      throw StateError('Issue comment $commentId has no created_at timestamp');
+    }
+    return DateTime.parse(timestamp);
   }
 }

@@ -28,11 +28,13 @@ class IssueScreen extends ConsumerWidget {
     required this.issueRef,
     this.initialIndex = 0,
     this.commentsSince,
+    this.scrollToCommentId,
     super.key,
   });
 
   final IssueRef issueRef;
   final DateTime? commentsSince;
+  final String? scrollToCommentId;
   final int initialIndex;
 
   @override
@@ -52,6 +54,7 @@ class IssueScreen extends ConsumerWidget {
         issueRef: issueRef,
         data: data,
         commentsSince: commentsSince,
+        scrollToCommentId: scrollToCommentId,
         initialIndex: initialIndex,
       ),
     );
@@ -63,12 +66,14 @@ class _IssueScreenContent extends ConsumerWidget {
     required this.issueRef,
     required this.data,
     this.commentsSince,
+    this.scrollToCommentId,
     this.initialIndex = 0,
   });
 
   final IssueRef issueRef;
   final IssueInfo data;
   final DateTime? commentsSince;
+  final String? scrollToCommentId;
   final int initialIndex;
 
   @override
@@ -77,6 +82,7 @@ class _IssueScreenContent extends ConsumerWidget {
       issueRef: issueRef,
       data: data,
       commentsSince: commentsSince,
+      scrollToCommentId: scrollToCommentId,
       initialIndex: initialIndex,
       onRefresh: () => ref.invalidate(issueDetailProvider(issueRef)),
     );
@@ -91,6 +97,7 @@ class _IssueShellContent extends ConsumerStatefulWidget {
     required this.data,
     required this.onRefresh,
     this.commentsSince,
+    this.scrollToCommentId,
     this.initialIndex = 0,
   });
 
@@ -98,6 +105,7 @@ class _IssueShellContent extends ConsumerStatefulWidget {
   final IssueInfo data;
   final VoidCallback onRefresh;
   final DateTime? commentsSince;
+  final String? scrollToCommentId;
   final int initialIndex;
 
   @override
@@ -124,7 +132,7 @@ class _IssueShellContentState extends ConsumerState<_IssueShellContent> {
       issueRef: widget.issueRef,
       onRefresh: () async => widget.onRefresh(),
       commentsSince: widget.commentsSince,
-      scrollToCommentId: null,
+      scrollToCommentId: widget.scrollToCommentId,
       linkedPRsSliverBuilder: (data.closedByPullRequestsReferences != null &&
               data.closedByPullRequestsReferences!.totalCount > 0)
           ? (ctx) => _buildLinkedPRsSlivers(
@@ -150,7 +158,8 @@ class _IssueShellContentState extends ConsumerState<_IssueShellContent> {
   void didUpdateWidget(covariant _IssueShellContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data ||
-        widget.issueRef != oldWidget.issueRef) {
+        widget.issueRef != oldWidget.issueRef ||
+        widget.scrollToCommentId != oldWidget.scrollToCommentId) {
       _buildConfig();
     }
   }
