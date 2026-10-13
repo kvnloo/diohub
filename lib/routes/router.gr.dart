@@ -702,6 +702,7 @@ class IssueDetailRoute extends _i23.PageRouteInfo<IssueDetailRouteArgs> {
     required _i25.IssueRef issueRef,
     _i24.Key? key,
     DateTime? commentsSince,
+    String? scrollToCommentId,
     int initialIndex = 0,
     List<_i23.PageRouteInfo>? children,
   }) : super(
@@ -710,6 +711,7 @@ class IssueDetailRoute extends _i23.PageRouteInfo<IssueDetailRouteArgs> {
            issueRef: issueRef,
            key: key,
            commentsSince: commentsSince,
+           scrollToCommentId: scrollToCommentId,
            initialIndex: initialIndex,
          ),
          initialChildren: children,
@@ -725,6 +727,7 @@ class IssueDetailRoute extends _i23.PageRouteInfo<IssueDetailRouteArgs> {
         issueRef: args.issueRef,
         key: args.key,
         commentsSince: args.commentsSince,
+        scrollToCommentId: args.scrollToCommentId,
         initialIndex: args.initialIndex,
       );
     },
@@ -736,6 +739,7 @@ class IssueDetailRouteArgs {
     required this.issueRef,
     this.key,
     this.commentsSince,
+    this.scrollToCommentId,
     this.initialIndex = 0,
   });
 
@@ -745,11 +749,13 @@ class IssueDetailRouteArgs {
 
   final DateTime? commentsSince;
 
+  final String? scrollToCommentId;
+
   final int initialIndex;
 
   @override
   String toString() {
-    return 'IssueDetailRouteArgs{issueRef: $issueRef, key: $key, commentsSince: $commentsSince, initialIndex: $initialIndex}';
+    return 'IssueDetailRouteArgs{issueRef: $issueRef, key: $key, commentsSince: $commentsSince, scrollToCommentId: $scrollToCommentId, initialIndex: $initialIndex}';
   }
 
   @override
@@ -759,6 +765,7 @@ class IssueDetailRouteArgs {
     return issueRef == other.issueRef &&
         key == other.key &&
         commentsSince == other.commentsSince &&
+        scrollToCommentId == other.scrollToCommentId &&
         initialIndex == other.initialIndex;
   }
 
@@ -767,6 +774,7 @@ class IssueDetailRouteArgs {
       issueRef.hashCode ^
       key.hashCode ^
       commentsSince.hashCode ^
+      scrollToCommentId.hashCode ^
       initialIndex.hashCode;
 }
 
