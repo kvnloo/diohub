@@ -12,11 +12,13 @@ class IssueDetailScreen extends ConsumerWidget {
     required this.issueRef,
     super.key,
     this.commentsSince,
+    this.scrollToCommentId,
     this.initialIndex = 0,
   });
 
   final IssueRef issueRef;
   final DateTime? commentsSince;
+  final String? scrollToCommentId;
   final int initialIndex;
 
   @override
@@ -25,6 +27,7 @@ class IssueDetailScreen extends ConsumerWidget {
       child: IssueScreen(
         issueRef: issueRef,
         commentsSince: commentsSince,
+        scrollToCommentId: scrollToCommentId,
         initialIndex: initialIndex,
       ),
     );

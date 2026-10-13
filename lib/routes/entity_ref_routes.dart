@@ -36,6 +36,7 @@ extension EntityRefRouting on EntityRef {
             ),
             IssueCommentRef r => IssueDetailRoute(
               issueRef: IssueRef(repo: r.repo, number: r.issueNumber),
+              scrollToCommentId: 'issuecomment-${r.commentId}',
             ),
             PRReviewCommentRef r => PullRequestDetailRoute(
               pullRef: PullRequestRef(repo: r.repo, number: r.prNumber),
