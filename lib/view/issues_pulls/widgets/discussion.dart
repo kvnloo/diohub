@@ -192,6 +192,8 @@ class IssuePullTimelineState extends ConsumerState<IssuePullTimeline> {
       containedIdsOf: (item) => item.containedIds,
       pageSize: 20,
       getPatches: () => ref.read(timelinePatchesProvider(scopeKey)),
+      // The screen explicitly chooses between forward fetch and anchor resolution.
+      autoFetch: false,
     );
     if (widget.scrollToCommentId != null) {
       _controller.navigateToAnchor(widget.scrollToCommentId!);
