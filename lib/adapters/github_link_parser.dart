@@ -136,6 +136,19 @@ abstract class GitHubLinkParser {
       final String numberStr = segments[3];
       final int? number = int.tryParse(numberStr);
       if (number != null) {
+        // PR review comments use numeric REST IDs in #discussion_r fragments.
+        // Preserve the comment identity instead of discarding the URL anchor.
+        if (commentId != null && commentId.startsWith('discussion_r')) {
+          final int? reviewCommentId =
+              int.tryParse(commentId.substring('discussion_r'.length));
+          if (reviewCommentId != null) {
+            return PRReviewCommentRef(
+              repo: repo,
+              prNumber: number,
+              commentId: reviewCommentId,
+            );
+          }
+        }
         String? diffPath;
         if (segments.length >= 5 &&
             segments[4] == 'files' &&

@@ -1,0 +1,77 @@
+name: OSS Wave Verification
+
+on:
+  push:
+    branches:
+      - verification/all-waves-oss
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout public sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # Explicit pin: flutter-version-file alone resolved latest stable
+          # (3.47.7) on this runner, breaking older third-party widgets.
+          flutter-version: '3.41.6'
+          channel: stable
+          cache: true
+      - name: Format proposed test files (show exact diff)
+        run: |
+          dart format \
+            lib/view/issues_pulls/widgets/timeline_fetch_policy.dart \
+            test/view/issues_pulls/widgets/timeline_fetch_policy_test.dart \
+            test/common/pagination/pagination_explicit_start_test.dart \
+            test/common/pagination/anchor_highlight_test.dart \
+            test/routes/issue_comment_deep_link_test.dart \
+            test/adapters/github_link_parser_review_comment_test.dart
+          git diff -- \
+            lib/view/issues_pulls/widgets/timeline_fetch_policy.dart \
+            test/view/issues_pulls/widgets/timeline_fetch_policy_test.dart \
+            test/common/pagination/pagination_explicit_start_test.dart \
+            test/common/pagination/anchor_highlight_test.dart \
+            test/routes/issue_comment_deep_link_test.dart \
+            test/adapters/github_link_parser_review_comment_test.dart
+      - name: Resolve public packages
+        run: |
+          flutter pub get
+          (cd packages/diohub_graphql && dart pub get)
+          (cd packages/diohub_models && dart pub get)
+          (cd packages/diohub_database && dart pub get)
+      - name: Generate public GraphQL types
+        run: |
+          (cd packages/diohub_graphql && dart run build_runner build --delete-conflicting-outputs)
+      - name: Generate shared Freezed and JSON models
+        run: |
+          (cd packages/diohub_models && dart run build_runner build --delete-conflicting-outputs)
+      - name: Generate Drift database code
+        run: |
+          (cd packages/diohub_database && dart run build_runner build --delete-conflicting-outputs)
+      - name: Generate remaining app code
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Targeted timeline and deep-link regression tests
+        run: |
+          flutter test \
+            test/view/issues_pulls/widgets/timeline_fetch_policy_test.dart \
+            test/common/pagination/pagination_explicit_start_test.dart \
+            test/common/pagination/anchor_highlight_test.dart \
+            test/routes/issue_comment_deep_link_test.dart \
+            test/adapters/github_link_parser_review_comment_test.dart
+      - name: Verify proposed formatting is committed
+        if: always()
+        run: |
+          git diff --exit-code -- \
+            test/view/issues_pulls/widgets/timeline_fetch_policy_test.dart \
+            test/common/pagination/pagination_explicit_start_test.dart \
+            test/common/pagination/anchor_highlight_test.dart \
+            test/adapters/github_link_parser_review_comment_test.dart
