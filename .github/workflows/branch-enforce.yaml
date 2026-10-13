@@ -17,6 +17,8 @@ jobs:
         with:
           policy: |
             *:develop
+            feature/*:develop
+            fix/*:develop
             develop:beta
             hotfix/*:beta
             hotfix/*:main
